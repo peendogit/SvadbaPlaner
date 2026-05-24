@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import Flowers from './components/Flowers';
 import Sidebar from './components/Sidebar';
 import Toast from './components/Toast';
 import Dashboard from './components/Dashboard';
@@ -68,9 +67,6 @@ export default function App() {
 
   return (
     <>
-      <Flowers />
-      <div className="ripple-container" ref={rippleRef} />
-
       {/* TOPBAR mobile */}
       <div className="topbar">
         <button className={`hb ${sbOpen ? 'open' : ''}`} onClick={() => setSbOpen(o => !o)}>
@@ -83,7 +79,7 @@ export default function App() {
         <Sidebar S={S} page={page} navTo={navTo} sbOpen={sbOpen} />
         <div className={`ov ${sbOpen ? 'vis' : ''}`} onClick={() => setSbOpen(false)} />
         <main className="main">
-          <PageComp S={S} update={update} showToast={showToast} />
+          <PageComp S={S} update={update} showToast={showToast} navTo={navTo} />
         </main>
       </div>
 
