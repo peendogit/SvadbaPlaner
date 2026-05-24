@@ -78,10 +78,8 @@ export default function Guests({ S, update, showToast }) {
 
   const generateLink = async (guest) => {
     try {
-      // Ako gost ima grupu, registruj sve članove grupe
       if (guest.group) {
         const groupMembers = S.guests.filter(g => g.group === guest.group);
-        // Registruj sve članove
         for (const member of groupMembers) {
           await fetch(`${API}/guests`, {
             method: 'POST',
@@ -89,13 +87,13 @@ export default function Guests({ S, update, showToast }) {
             body: JSON.stringify({ id: member.id, guest_name: member.name, group_name: guest.group }),
           });
         }
-        // Uzmi token prvog člana kao grupni token
         const r = await fetch(`${API}/group/${encodeURIComponent(guest.group)}`);
         if (r.ok) {
           const data = await r.json();
-          const link = `${window.location.origin}/rsvp/group/${encodeURIComponent(guest.group)}?t=${data.token}`;
+          // Koristimo group_token direktno kao RSVP token za grupu
+          const link = `${window.location.origin}/rsvp/${data.group_token}?group=1`;
           copyToClipboard(link);
-          setGroupTokens(gt => ({ ...gt, [guest.group]: data.token }));
+          setGroupTokens(gt => ({ ...gt, [guest.group]: data.group_token }));
           setLinkCopied(guest.id);
           setTimeout(() => setLinkCopied(null), 3000);
           showToast(`Link kopiran za grupu "${guest.group}" ✓`, 'ok');
@@ -343,17 +341,33 @@ export default function Guests({ S, update, showToast }) {
               </div>
             </div>
 
-            <div className="fg">
+            <div className="fg" style={{position:'relative'}}>
               <label>Grupa porodice / para (opcionalno)</label>
               <input
                 value={modal.group||''}
                 onChange={e => setModal(m => ({...m, group:e.target.value}))}
-                placeholder="npr. Porodica Hodžić"
-                list="groupSuggestions"
+                autoComplete="off"
               />
-              <datalist id="groupSuggestions">
-                {existingGroups.map(g => <option key={g} value={g} />)}
-              </datalist>
+              {modal.group && existingGroups.filter(g =>
+                g.toLowerCase().includes(modal.group.toLowerCase()) && g !== modal.group
+              ).length > 0 && (
+                <div style={{
+                  position:'absolute', top:'100%', left:0, right:0, zIndex:100,
+                  background:'white', border:'1.5px solid var(--ro)', borderRadius:9,
+                  boxShadow:'var(--s2)', overflow:'hidden', marginTop:2,
+                }}>
+                  {existingGroups
+                    .filter(g => g.toLowerCase().includes(modal.group.toLowerCase()) && g !== modal.group)
+                    .map(g => (
+                      <div key={g} onClick={() => setModal(m => ({...m, group:g}))}
+                        style={{padding:'10px 13px', cursor:'pointer', fontSize:13, borderBottom:'1px solid var(--bor)'}}
+                        onMouseEnter={e => e.target.style.background='var(--b)'}
+                        onMouseLeave={e => e.target.style.background='white'}>
+                        👨‍👩‍👧 {g}
+                      </div>
+                    ))}
+                </div>
+              )}
               {modal.group && (
                 <div style={{fontSize:11, color:'var(--sd)', marginTop:4}}>
                   ✓ Jedan RSVP link za cijelu grupu "{modal.group}"
