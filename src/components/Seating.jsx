@@ -317,7 +317,20 @@ export default function Seating({ S, update, showToast }) {
             <div style={{marginTop:12,padding:12,background:'var(--b)',borderRadius:10,fontSize:12,color:'var(--im)'}}>
               <strong>Gosti za ovim stolom:</strong>
               <div style={{marginTop:7,display:'flex',flexWrap:'wrap',gap:5}}>
-                {tblModal.guests?.map(gid=>{const g=S.guests.find(x=>x.id===gid);return g?<span key={gid} style={{background:'var(--b)',padding:'3px 9px',borderRadius:20,fontSize:12,display:'inline-flex',alignItems:'center',gap:5}}>{g.name}<span onClick={()=>{rmGFromT(tblModal.id,gid);setTblModal(m=>({...m,guests:m.guests.filter(x=>x!==gid);}));}} style={{cursor:'pointer',color:'var(--dan)',fontWeight:700}}>×</span></span>:null})}
+                {(tblModal.guests || []).map(gid => {
+                  const g = S.guests.find(x => x.id === gid);
+                  if (!g) return null;
+                  const removeG = () => {
+                    rmGFromT(tblModal.id, gid);
+                    setTblModal(m => ({ ...m, guests: m.guests.filter(x => x !== gid) }));
+                  };
+                  return (
+                    <span key={gid} style={{background:'var(--b)',padding:'3px 9px',borderRadius:20,fontSize:12,display:'inline-flex',alignItems:'center',gap:5}}>
+                      {g.name}
+                      <span onClick={removeG} style={{cursor:'pointer',color:'var(--dan)',fontWeight:700}}>x</span>
+                    </span>
+                  );
+                })}
                 {!tblModal.guests?.length&&<span style={{color:'var(--il)'}}>Nema gostiju</span>}
               </div>
             </div>
