@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
-const API = '/api';
+const API = '/svadba-api';
 const CAT_L = { mladozenjina:'Mladoženjina', mladina:'Mladina', kumovi:'Kumovi', prijatelji:'Prijatelji', kolege:'Kolege' };
 const RSVP_B = { confirmed:'byes', pending:'bwait', declined:'bno' };
 const RSVP_L = { confirmed:'Potvrdio/la', pending:'Na čekanju', declined:'Otkazao/la' };
