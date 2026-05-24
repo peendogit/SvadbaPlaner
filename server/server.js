@@ -29,7 +29,7 @@ try { db.exec(`ALTER TABLE rsvp ADD COLUMN group_name TEXT`); } catch {}
 try { db.exec(`ALTER TABLE rsvp ADD COLUMN group_token TEXT`); } catch {}
 
 // Pojedinačni RSVP — GET
-app.get('/api/rsvp/:token', (req, res) => {
+app.get('/svadba-api/rsvp/:token', (req, res) => {
   const token = req.params.token;
   // Provjeri da li je grupni token
   const isGroup = req.query.group === '1';
@@ -44,7 +44,7 @@ app.get('/api/rsvp/:token', (req, res) => {
 });
 
 // Pojedinačni RSVP — POST
-app.post('/api/rsvp/:token', (req, res) => {
+app.post('/svadba-api/rsvp/:token', (req, res) => {
   const token = req.params.token;
   const isGroup = req.query.group === '1';
 
@@ -70,7 +70,7 @@ app.post('/api/rsvp/:token', (req, res) => {
 });
 
 // GET group token
-app.get('/api/group/:groupName', (req, res) => {
+app.get('/svadba-api/group/:groupName', (req, res) => {
   const groupName = decodeURIComponent(req.params.groupName);
   const existing = db.prepare('SELECT group_token FROM rsvp WHERE group_name = ? LIMIT 1').get(groupName);
   if (existing) return res.json({ group_token: existing.group_token });
@@ -78,11 +78,11 @@ app.get('/api/group/:groupName', (req, res) => {
 });
 
 // Admin
-app.get('/api/guests', (req, res) => {
+app.get('/svadba-api/guests', (req, res) => {
   res.json(db.prepare('SELECT * FROM rsvp ORDER BY group_name, created_at').all());
 });
 
-app.post('/api/guests', (req, res) => {
+app.post('/svadba-api/guests', (req, res) => {
   const { id, guest_name, group_name } = req.body;
   if (!id || !guest_name) return res.status(400).json({ error: 'id i guest_name obavezni' });
   const existing = db.prepare('SELECT token, group_token FROM rsvp WHERE id = ?').get(id);
@@ -97,12 +97,12 @@ app.post('/api/guests', (req, res) => {
   res.json({ token, group_token });
 });
 
-app.delete('/api/guests/:id', (req, res) => {
+app.delete('/svadba-api/guests/:id', (req, res) => {
   db.prepare('DELETE FROM rsvp WHERE id = ?').run(req.params.id);
   res.json({ ok: true });
 });
 
-app.get('/api/sync', (req, res) => {
+app.get('/svadba-api/sync', (req, res) => {
   res.json(db.prepare('SELECT id, status, responded_at FROM rsvp').all());
 });
 

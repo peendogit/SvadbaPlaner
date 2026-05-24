@@ -55,7 +55,7 @@ let responses = {};
 async function init() {
   if (!token) { showError('Link nije validan.'); return; }
   try {
-    const url = isGroup ? `/api/rsvp/${token}?group=1` : `/api/rsvp/${token}`;
+    const url = isGroup ? `/svadba-api/rsvp/${token}?group=1` : `/svadba-api/rsvp/${token}`;
     const r = await fetch(url);
     if (!r.ok) { showError('Link nije validan ili je istekao.'); return; }
     data = await r.json();
@@ -116,7 +116,7 @@ async function respondSingle(status) {
   const message = document.getElementById('msgInput')?.value||'';
   document.querySelectorAll('.btn-yes,.btn-no').forEach(b=>{b.disabled=true;b.style.opacity='.6';});
   try {
-    const r = await fetch(`/api/rsvp/${token}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({status,message})});
+    const r = await fetch(`/svadba-api/rsvp/${token}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({status,message})});
     if(!r.ok) throw new Error();
     data.status = status;
     showSingleResult();
@@ -131,7 +131,7 @@ async function respondGroup() {
   btn.disabled = true; btn.textContent = 'Šaljem...';
   const payload = Object.entries(responses).map(([id,r])=>({id,status:r.status,message:r.message}));
   try {
-    const r = await fetch(`/api/rsvp/${token}?group=1`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({responses:payload})});
+    const r = await fetch(`/svadba-api/rsvp/${token}?group=1`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({responses:payload})});
     if(!r.ok) throw new Error();
     payload.forEach(p=>{const m=data.members.find(x=>x.id===p.id);if(m)m.status=p.status;});
     showGroupResult();
