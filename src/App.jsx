@@ -79,10 +79,9 @@ export default function App() {
         <div className="topbar-logo">Svadba<em>.ba</em></div>
       </div>
 
-      <div className={`ov ${sbOpen ? 'vis' : ''}`} onClick={() => setSbOpen(false)} />
-
       <div className="app-shell">
         <Sidebar S={S} page={page} navTo={navTo} sbOpen={sbOpen} />
+        <div className={`ov ${sbOpen ? 'vis' : ''}`} onClick={() => setSbOpen(false)} />
         <main className="main">
           <PageComp S={S} update={update} showToast={showToast} />
         </main>

@@ -125,8 +125,9 @@ html, body { height: 100%; font-family: 'Inter', sans-serif; background: var(--o
   background: rgba(46,38,32,.4);
   z-index: 299; opacity: 0;
   transition: opacity .25s;
+  pointer-events: none;
 }
-.ov.vis { opacity: 1; }
+.ov.vis { opacity: 1; pointer-events: auto; }
 
 /* ── SIDEBAR ── */
 .sb {
