@@ -14,7 +14,6 @@ body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#f9f0ee,#f
 .names{font-family:'Cormorant Garamond',serif;font-size:28px;font-style:italic;color:#2e2620;margin-bottom:6px}
 .divider{width:40px;height:1px;background:#e8c4bc;margin:16px auto}
 .question{font-size:14px;color:#6b5c50;margin-bottom:22px;line-height:1.6}
-/* Single guest */
 .msg-area{margin-bottom:18px;text-align:left}
 .msg-area label{font-size:12px;color:#9e8e82;display:block;margin-bottom:5px}
 .msg-area textarea{width:100%;padding:10px 12px;border:1.5px solid #ede5df;border-radius:10px;font-family:'Inter',sans-serif;font-size:13px;resize:none;outline:none}
@@ -24,20 +23,18 @@ body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#f9f0ee,#f
 .btn-yes:hover{background:#a85e50;transform:translateY(-1px)}
 .btn-no{flex:1;padding:13px;border-radius:11px;background:transparent;color:#c97d6e;border:2px solid #e8c4bc;font-family:'Inter',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all .2s}
 .btn-no:hover{background:#f9f0ee}
-/* Group */
 .member-card{background:#f9f0ee;border-radius:14px;padding:16px;margin-bottom:12px;text-align:left}
 .member-name{font-weight:600;font-size:15px;color:#2e2620;margin-bottom:10px}
-.member-btns{display:flex;gap:8px;margin-bottom:8px}
-.m-yes{flex:1;padding:9px;border-radius:9px;background:#c97d6e;color:white;border:none;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;opacity:.5}
-.m-yes.sel{opacity:1;transform:scale(1.02)}
-.m-no{flex:1;padding:9px;border-radius:9px;background:transparent;color:#c97d6e;border:1.5px solid #e8c4bc;font-family:'Inter',sans-serif;font-size:13px;cursor:pointer;transition:all .2s;opacity:.5}
+.member-btns{display:flex;gap:8px;margin-bottom:6px}
+.m-yes{flex:1;padding:9px;border-radius:9px;background:#c97d6e;color:white;border:none;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;opacity:.4}
+.m-yes.sel{opacity:1}
+.m-no{flex:1;padding:9px;border-radius:9px;background:transparent;color:#c97d6e;border:1.5px solid #e8c4bc;font-family:'Inter',sans-serif;font-size:13px;cursor:pointer;transition:all .2s;opacity:.4}
 .m-no.sel{opacity:1;background:#f0ddd9}
 .m-msg{width:100%;padding:8px 11px;border:1.5px solid #ede5df;border-radius:8px;font-family:'Inter',sans-serif;font-size:12px;resize:none;outline:none;margin-top:6px;display:none}
 .m-msg.vis{display:block}
 .submit-all{width:100%;padding:14px;border-radius:12px;background:#c97d6e;color:white;border:none;font-family:'Inter',sans-serif;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px;transition:all .2s}
 .submit-all:hover{background:#a85e50}
-.submit-all:disabled{opacity:.6;cursor:not-allowed}
-/* Result */
+.submit-all:disabled{opacity:.5;cursor:not-allowed}
 .result{padding:24px 16px}
 .result-icon{font-size:48px;margin-bottom:12px}
 .result-title{font-family:'Cormorant Garamond',serif;font-size:24px;color:#2e2620;margin-bottom:7px}
@@ -49,27 +46,23 @@ body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#f9f0ee,#f
 <body>
 <div class="card" id="app"><div class="loading">Učitavam...</div></div>
 <script>
-const path = window.location.pathname;
-const isGroup = path.includes('/rsvp/group/');
-const params = new URLSearchParams(window.location.search);
-const groupToken = params.get('t');
+const urlParams = new URLSearchParams(window.location.search);
+const isGroup = urlParams.get('group') === '1';
+const token = window.location.pathname.split('/rsvp/')[1]?.replace(/\//g,'');
 let data = null;
 let responses = {};
 
 async function init() {
+  if (!token) { showError('Link nije validan.'); return; }
   try {
-    if (isGroup) {
-      const groupName = decodeURIComponent(path.split('/rsvp/group/')[1]?.replace(/\//g,''));
-      const r = await fetch(`/api/rsvp/group/${encodeURIComponent(groupName)}?t=${groupToken}`);
-      if (!r.ok) { showError('Link nije validan.'); return; }
-      data = await r.json();
+    const url = isGroup ? `/api/rsvp/${token}?group=1` : `/api/rsvp/${token}`;
+    const r = await fetch(url);
+    if (!r.ok) { showError('Link nije validan ili je istekao.'); return; }
+    data = await r.json();
+    if (data.is_group) {
       const allAnswered = data.members.every(m => m.status !== 'pending');
       allAnswered ? showGroupResult() : showGroupForm();
     } else {
-      const token = path.split('/rsvp/')[1]?.replace(/\//g,'');
-      const r = await fetch(`/api/rsvp/${token}`);
-      if (!r.ok) { showError('Link nije validan.'); return; }
-      data = await r.json();
       data.status !== 'pending' ? showSingleResult() : showSingleForm();
     }
   } catch(e) { showError('Greška pri učitavanju.'); }
@@ -90,35 +83,31 @@ function showSingleForm() {
 }
 
 function showGroupForm() {
-  const members = data.members.map(m => {
-    responses[m.id] = { status: null, message: '' };
-    return `<div class="member-card" id="mc_${m.id}">
+  data.members.forEach(m => { responses[m.id] = { status: null, message: '' }; });
+  const members = data.members.map(m => `
+    <div class="member-card">
       <div class="member-name">${m.guest_name}</div>
       <div class="member-btns">
         <button class="m-yes" id="yes_${m.id}" onclick="selectMember('${m.id}','confirmed')">✓ Dolazim</button>
         <button class="m-no" id="no_${m.id}" onclick="selectMember('${m.id}','declined')">Ne mogu</button>
       </div>
-      <textarea class="m-msg" id="msg_${m.id}" rows="1" placeholder="Poruka (opcionalno)" oninput="responses['${m.id}'].message=this.value"></textarea>
-    </div>`;
-  }).join('');
-
+      <textarea class="m-msg" id="msg_${m.id}" rows="1" placeholder="Poruka..." oninput="responses['${m.id}'].message=this.value"></textarea>
+    </div>`).join('');
   document.getElementById('app').innerHTML = `
     <div class="ornament">💍</div>
     <div class="label">Potvrda dolaska</div>
     <div class="names">${data.group_name}</div>
     <div class="divider"></div>
-    <div class="question">Odaberite za svakog člana porodice:</div>
+    <div class="question">Odaberite za svakog člana:</div>
     ${members}
     <button class="submit-all" id="submitBtn" onclick="respondGroup()" disabled>Pošalji potvrde</button>`;
 }
 
 function selectMember(id, status) {
   responses[id].status = status;
-  document.getElementById('yes_'+id).className = 'm-yes' + (status==='confirmed'?' sel':'');
-  document.getElementById('no_'+id).className = 'm-no' + (status==='declined'?' sel':'');
-  const msgEl = document.getElementById('msg_'+id);
-  msgEl.className = 'm-msg' + (status==='declined'?' vis':'');
-  // Provjeri da li su svi odgovorili
+  document.getElementById('yes_'+id).className = 'm-yes' + (status==='confirmed' ? ' sel' : '');
+  document.getElementById('no_'+id).className = 'm-no' + (status==='declined' ? ' sel' : '');
+  document.getElementById('msg_'+id).className = 'm-msg' + (status==='declined' ? ' vis' : '');
   const allDone = Object.values(responses).every(r => r.status !== null);
   document.getElementById('submitBtn').disabled = !allDone;
 }
@@ -126,13 +115,12 @@ function selectMember(id, status) {
 async function respondSingle(status) {
   const message = document.getElementById('msgInput')?.value||'';
   document.querySelectorAll('.btn-yes,.btn-no').forEach(b=>{b.disabled=true;b.style.opacity='.6';});
-  const token = window.location.pathname.split('/rsvp/')[1]?.replace(/\//g,'');
   try {
     const r = await fetch(`/api/rsvp/${token}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({status,message})});
     if(!r.ok) throw new Error();
     data.status = status;
     showSingleResult();
-  } catch(e) {
+  } catch {
     document.querySelectorAll('.btn-yes,.btn-no').forEach(b=>{b.disabled=false;b.style.opacity='1';});
     alert('Greška. Pokušajte ponovo.');
   }
@@ -141,15 +129,13 @@ async function respondSingle(status) {
 async function respondGroup() {
   const btn = document.getElementById('submitBtn');
   btn.disabled = true; btn.textContent = 'Šaljem...';
-  const groupName = decodeURIComponent(window.location.pathname.split('/rsvp/group/')[1]?.replace(/\//g,''));
   const payload = Object.entries(responses).map(([id,r])=>({id,status:r.status,message:r.message}));
   try {
-    const r = await fetch(`/api/rsvp/group/${encodeURIComponent(groupName)}?t=${groupToken}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({responses:payload})});
+    const r = await fetch(`/api/rsvp/${token}?group=1`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({responses:payload})});
     if(!r.ok) throw new Error();
-    // Update local data
-    payload.forEach(p => { const m=data.members.find(x=>x.id===p.id); if(m) m.status=p.status; });
+    payload.forEach(p=>{const m=data.members.find(x=>x.id===p.id);if(m)m.status=p.status;});
     showGroupResult();
-  } catch(e) {
+  } catch {
     btn.disabled=false; btn.textContent='Pošalji potvrde';
     alert('Greška. Pokušajte ponovo.');
   }
@@ -169,10 +155,10 @@ function showGroupResult() {
   const declined = data.members.filter(m=>m.status==='declined');
   document.getElementById('app').innerHTML=`<div class="result">
     <div class="result-icon">🥂</div>
-    <div class="result-title">Hvala, ${data.group_name}!</div>
+    <div class="result-title">Hvala!</div>
     <div class="result-sub">
-      ${confirmed.length?`<strong>Dolaze:</strong> ${confirmed.map(m=>m.guest_name).join(', ')}<br>`:''}
-      ${declined.length?`<strong>Nažalost ne mogu:</strong> ${declined.map(m=>m.guest_name).join(', ')}`:''}
+      ${confirmed.length?`<strong>Dolaze:</strong> ${confirmed.map(m=>m.guest_name).join(', ')}<br><br>`:''}
+      ${declined.length?`<strong>Ne mogu doći:</strong> ${declined.map(m=>m.guest_name).join(', ')}`:''}
     </div>
   </div>`;
 }

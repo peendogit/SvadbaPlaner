@@ -25,48 +25,47 @@ db.exec(`
     created_at TEXT DEFAULT (datetime('now'))
   )
 `);
-// Dodaj kolone ako ne postoje (migracija)
 try { db.exec(`ALTER TABLE rsvp ADD COLUMN group_name TEXT`); } catch {}
 try { db.exec(`ALTER TABLE rsvp ADD COLUMN group_token TEXT`); } catch {}
 
-// Pojedinačni RSVP
+// Pojedinačni RSVP — GET
 app.get('/api/rsvp/:token', (req, res) => {
-  const guest = db.prepare('SELECT id, guest_name, status, responded_at FROM rsvp WHERE token = ?').get(req.params.token);
+  const token = req.params.token;
+  // Provjeri da li je grupni token
+  const isGroup = req.query.group === '1';
+  if (isGroup) {
+    const members = db.prepare('SELECT id, guest_name, status, responded_at, group_name FROM rsvp WHERE group_token = ?').all(token);
+    if (!members.length) return res.status(404).json({ error: 'Link nije validan' });
+    return res.json({ is_group: true, group_name: members[0].group_name, members });
+  }
+  const guest = db.prepare('SELECT id, guest_name, status, responded_at FROM rsvp WHERE token = ?').get(token);
   if (!guest) return res.status(404).json({ error: 'Link nije validan' });
   res.json(guest);
 });
 
+// Pojedinačni RSVP — POST
 app.post('/api/rsvp/:token', (req, res) => {
+  const token = req.params.token;
+  const isGroup = req.query.group === '1';
+
+  if (isGroup) {
+    const { responses } = req.body;
+    if (!responses || !Array.isArray(responses)) return res.status(400).json({ error: 'Nevažeći podaci' });
+    const members = db.prepare('SELECT id FROM rsvp WHERE group_token = ?').all(token);
+    const validIds = new Set(members.map(m => m.id));
+    responses.forEach(({ id, status, message }) => {
+      if (validIds.has(id) && ['confirmed','declined'].includes(status)) {
+        db.prepare(`UPDATE rsvp SET status=?, message=?, responded_at=datetime('now') WHERE id=?`).run(status, message||null, id);
+      }
+    });
+    return res.json({ ok: true });
+  }
+
   const { status, message } = req.body;
   if (!['confirmed', 'declined'].includes(status)) return res.status(400).json({ error: 'Nevažeći status' });
-  const guest = db.prepare('SELECT id FROM rsvp WHERE token = ?').get(req.params.token);
+  const guest = db.prepare('SELECT id FROM rsvp WHERE token = ?').get(token);
   if (!guest) return res.status(404).json({ error: 'Link nije validan' });
-  db.prepare(`UPDATE rsvp SET status=?, message=?, responded_at=datetime('now') WHERE token=?`).run(status, message||null, req.params.token);
-  res.json({ ok: true });
-});
-
-// Grupni RSVP
-app.get('/api/rsvp/group/:groupName', (req, res) => {
-  const groupName = decodeURIComponent(req.params.groupName);
-  const token = req.query.t;
-  const members = db.prepare('SELECT id, guest_name, status, responded_at FROM rsvp WHERE group_name = ? AND group_token = ?').all(groupName, token);
-  if (!members.length) return res.status(404).json({ error: 'Grupa nije pronađena' });
-  res.json({ group_name: groupName, members });
-});
-
-app.post('/api/rsvp/group/:groupName', (req, res) => {
-  const groupName = decodeURIComponent(req.params.groupName);
-  const token = req.query.t;
-  const { responses } = req.body; // [{ id, status, message }]
-  if (!responses || !Array.isArray(responses)) return res.status(400).json({ error: 'Nevažeći podaci' });
-  const members = db.prepare('SELECT id FROM rsvp WHERE group_name = ? AND group_token = ?').all(groupName, token);
-  if (!members.length) return res.status(404).json({ error: 'Grupa nije pronađena' });
-  const validIds = new Set(members.map(m => m.id));
-  responses.forEach(({ id, status, message }) => {
-    if (validIds.has(id) && ['confirmed','declined'].includes(status)) {
-      db.prepare(`UPDATE rsvp SET status=?, message=?, responded_at=datetime('now') WHERE id=?`).run(status, message||null, id);
-    }
-  });
+  db.prepare(`UPDATE rsvp SET status=?, message=?, responded_at=datetime('now') WHERE token=?`).run(status, message||null, token);
   res.json({ ok: true });
 });
 
@@ -74,7 +73,7 @@ app.post('/api/rsvp/group/:groupName', (req, res) => {
 app.get('/api/group/:groupName', (req, res) => {
   const groupName = decodeURIComponent(req.params.groupName);
   const existing = db.prepare('SELECT group_token FROM rsvp WHERE group_name = ? LIMIT 1').get(groupName);
-  if (existing) return res.json({ token: existing.group_token });
+  if (existing) return res.json({ group_token: existing.group_token });
   res.status(404).json({ error: 'Grupa nije pronađena' });
 });
 
