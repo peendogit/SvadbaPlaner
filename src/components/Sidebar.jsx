@@ -37,6 +37,8 @@ export default function Sidebar({ S, page, navTo, sbOpen }) {
     const [y, m, d] = dateStr.split('-');
     return `${parseInt(d)}. ${MONTHS[parseInt(m)-1]} ${y}`;
   };
+
+  const badge = (key) => {
     if (key === 'guests') return S.guests.length;
     if (key === 'tasks') return S.tasks.filter(t => !t.done).length;
     return null;
