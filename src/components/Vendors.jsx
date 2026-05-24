@@ -63,12 +63,12 @@ export default function Vendors({ S, update, showToast }) {
               <div className="fg"><label>Kategorija</label><select value={modal.category||'Fotografija'} onChange={e=>setModal(m=>({...m,category:e.target.value}))}>{Object.keys(CATE).map(c=><option key={c} value={c}>{CATE[c]} {c}</option>)}</select></div>
             </div>
             <div className="fr">
-              <div className="fg"><label>Telefon</label><input value={modal.phone||''} onChange={e=>setModal(m=>({...m,phone:e.target.value}))} placeholder="+387..."/></div>
-              <div className="fg"><label>Cijena (KM)</label><input value={modal.price||''} onChange={e=>setModal(m=>({...m,price:e.target.value}))} placeholder="npr. 800"/></div>
+              <div className="fg"><label>Telefon</label><input value={modal.phone||''} onChange={e=>setModal(m=>({...m,phone:e.target.value}))} /></div>
+              <div className="fg"><label>Cijena (KM)</label><input value={modal.price||''} onChange={e=>setModal(m=>({...m,price:e.target.value}))} /></div>
             </div>
             <div className="fr">
               <div className="fg"><label>Status</label><select value={modal.status||'razmatranje'} onChange={e=>setModal(m=>({...m,status:e.target.value}))}><option value="razmatranje">U razmatranju</option><option value="kontaktiran">Kontaktiran</option><option value="ugovoren">Ugovoren ✓</option><option value="plaćen">Plaćen ✓</option></select></div>
-              <div className="fg"><label>Website</label><input value={modal.web||''} onChange={e=>setModal(m=>({...m,web:e.target.value}))} placeholder="www..."/></div>
+              <div className="fg"><label>Website</label><input value={modal.web||''} onChange={e=>setModal(m=>({...m,web:e.target.value}))} /></div>
             </div>
             <div className="fg"><label>Napomena</label><textarea value={modal.note||''} onChange={e=>setModal(m=>({...m,note:e.target.value}))} placeholder="Utisci, dogovor..."/></div>
             <div className="mf"><button className="btn bo" onClick={()=>setModal(null)}>Otkaži</button><button className="btn bp" onClick={save}>Sačuvaj</button></div>

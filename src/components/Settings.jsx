@@ -33,31 +33,31 @@ export default function Settings({ S, update, showToast, navTo }) {
 
         <div className="sett-sec">
           <h3>👫 Par</h3>
-          <div className="fg"><label>Ime mlade</label><input value={form.bride || ''} onChange={set('bride')} placeholder="Amra" /></div>
-          <div className="fg"><label>Ime mladoženje</label><input value={form.groom || ''} onChange={set('groom')} placeholder="Haris" /></div>
-          <div className="fg"><label>Zajedničko prezime</label><input value={form.surname || ''} onChange={set('surname')} placeholder="npr. Hodžić" /></div>
+          <div className="fg"><label>Ime mlade</label><input value={form.bride || ''} onChange={set('bride')}  /></div>
+          <div className="fg"><label>Ime mladoženje</label><input value={form.groom || ''} onChange={set('groom')}  /></div>
+          <div className="fg"><label>Zajedničko prezime</label><input value={form.surname || ''} onChange={set('surname')}  /></div>
         </div>
 
         <div className="sett-sec">
           <h3>📅 Datum i lokacija</h3>
           <div className="fg"><label>Datum vjenčanja</label><input type="date" value={form.date || ''} onChange={set('date')} /></div>
           <div className="fg"><label>Sat početka</label><input type="time" value={form.time || ''} onChange={set('time')} /></div>
-          <div className="fg"><label>Naziv sale / restorana</label><input value={form.venue || ''} onChange={set('venue')} placeholder="Restoran Stari Grad" /></div>
-          <div className="fg"><label>Grad</label><input value={form.city || ''} onChange={set('city')} placeholder="Sarajevo" /></div>
+          <div className="fg"><label>Naziv sale / restorana</label><input value={form.venue || ''} onChange={set('venue')}  /></div>
+          <div className="fg"><label>Grad</label><input value={form.city || ''} onChange={set('city')}  /></div>
         </div>
 
         <div className="sett-sec">
           <h3>💌 Matičar / Ceremonija</h3>
-          <div className="fg"><label>Ime matičara</label><input value={form.registrar || ''} onChange={set('registrar')} placeholder="npr. Suad Begić" /></div>
-          <div className="fg"><label>Lokacija ceremonije</label><input value={form.ceremony || ''} onChange={set('ceremony')} placeholder="Matičarski ured" /></div>
+          <div className="fg"><label>Ime matičara</label><input value={form.registrar || ''} onChange={set('registrar')}  /></div>
+          <div className="fg"><label>Lokacija ceremonije</label><input value={form.ceremony || ''} onChange={set('ceremony')}  /></div>
           <div className="fg"><label>Sat ceremonije</label><input type="time" value={form.ceremonyTime || ''} onChange={set('ceremonyTime')} /></div>
         </div>
 
         <div className="sett-sec">
           <h3>📞 Kontakti</h3>
-          <div className="fg"><label>Kontakt telefon</label><input type="tel" value={form.phone || ''} onChange={set('phone')} placeholder="+387 61 ..." /></div>
-          <div className="fg"><label>Email</label><input type="email" value={form.email || ''} onChange={set('email')} placeholder="svadba@email.com" /></div>
-          <div className="fg"><label>Website</label><input value={form.web || ''} onChange={set('web')} placeholder="www.amraiharis.ba" /></div>
+          <div className="fg"><label>Kontakt telefon</label><input type="tel" value={form.phone || ''} onChange={set('phone')}  /></div>
+          <div className="fg"><label>Email</label><input type="email" value={form.email || ''} onChange={set('email')}  /></div>
+          <div className="fg"><label>Website</label><input value={form.web || ''} onChange={set('web')}  /></div>
         </div>
 
         <div className="sett-sec full">
