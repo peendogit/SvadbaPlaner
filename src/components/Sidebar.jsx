@@ -30,7 +30,13 @@ export default function Sidebar({ S, page, navTo, sbOpen }) {
     else setCountdown(`${d}`);
   }, [S.wedding.date]);
 
-  const badge = (key) => {
+  const MONTHS = ['Januar','Februar','Mart','April','Maj','Juni','Juli','August','Septembar','Oktobar','Novembar','Decembar'];
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '';
+    const [y, m, d] = dateStr.split('-');
+    return `${parseInt(d)}. ${MONTHS[parseInt(m)-1]} ${y}`;
+  };
     if (key === 'guests') return S.guests.length;
     if (key === 'tasks') return S.tasks.filter(t => !t.done).length;
     return null;
@@ -45,8 +51,9 @@ export default function Sidebar({ S, page, navTo, sbOpen }) {
 
       <div className="dw">
         <label>Datum vjenčanja</label>
-        <input type="date" value={S.wedding.date || ''} readOnly
-          style={{ pointerEvents:'none', background:'transparent', border:'none', color:'var(--ink)', fontFamily:'Inter', fontSize:13, width:'100%' }} />
+        <div style={{fontSize:13,color:'var(--ink)',padding:'2px 0',minHeight:20}}>
+          {S.wedding.date ? formatDate(S.wedding.date) : <span style={{color:'var(--il)'}}>Unesite u Podešavanjima</span>}
+        </div>
         <div className="cd">
           {countdown
             ? days === 0

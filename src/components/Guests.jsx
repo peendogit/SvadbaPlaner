@@ -81,7 +81,7 @@ export default function Guests({ S, update, showToast }) {
                   <td><span className="badge bcat">{CAT_L[g.category]||g.category}</span></td>
                   <td><span className={`badge ${RSVP_B[g.rsvp]||''}`}>{RSVP_L[g.rsvp]||g.rsvp}</span></td>
                   <td>{g.menu||<span style={{color:'var(--il)'}}>—</span>}</td>
-                  <td style={{fontSize:12}}>{g.acc?'🏨 ':''}{g.trans?'🚗':''}</td>
+                  <td style={{fontSize:12}}>{g.acc?'🛎️ ':''}{g.trans?'🚗':''}</td>
                   <td style={{fontSize:12,color:'var(--im)'}}>{g.note}</td>
                   <td><div style={{display:'flex',gap:5}}>
                     <button className="btn bo sm ic" onClick={()=>open(g.id)}>✏</button>
